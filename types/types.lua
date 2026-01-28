@@ -1,0 +1,13 @@
+---@class ZeroLifes
+---@field RemoveAllItems boolean
+---@field RemoveAllWeapons boolean
+---@field RemoveAllCurrencies boolean
+---@field ForceRespawnCoords vector4
+
+---@class Config
+---@field Lifes integer
+---@field CheckingDays integer
+---@field CheckingInterval integer
+---@field IdentifierType "steam"|"discord"|"xbl"|"live"|"license"|"license2"|"fivem"
+---@field RemovePrefix string|nil
+---@field OnZeroLifes ZeroLifes
