@@ -1,8 +1,8 @@
 ---@class Config
-PFX = {
-    Lives = 7, -- used in SQL and Server checks
+PFX = {    Locale = "en", -- default locale    Lives = 7, -- used in SQL and Server checks
     CheckingDays = 9, -- change only applies after the server recaches the expiry date
     CheckingInterval = 1, -- checks the exiry time every X minutes
+    ErrorPrints = true, -- enable/disable error prints in console
 
     -- not in use when `UsingMulticharacter` is enabled
     IdentifierType = "license", -- identifier type you need (e.g. license, steam, xbl, discord)

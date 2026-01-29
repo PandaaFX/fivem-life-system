@@ -4,7 +4,11 @@ version '1.0.0'
 author 'PandaaFX'
 description 'Lebenssystem'
 
-shared_script '@es_extended/imports.lua'
+shared_scripts {
+    '@es_extended/imports.lua',
+    'locale.lua',
+    'locales/*.lua'
+}
 
 client_script 'client/main.lua'
 

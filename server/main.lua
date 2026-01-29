@@ -2,6 +2,12 @@ local kvpInt = GetCurrentResourceName() .. "_lives_reset_timer"
 
 local livesReset = 0
 
+local function errorPrint(msg, ...)
+    if not PFX.ErrorPrints then return end
+    local dateTimeString = os.date("%Y-%m-%d %H:%M:%S")
+    print(("[%s] %s"):format(dateTimeString, msg:format(...)))
+end
+
 local function timeDiffHumanReadable()
     local currentTime = os.time()
     local endTime = livesReset
@@ -12,7 +18,7 @@ local function timeDiffHumanReadable()
     local hours = math.floor((diff % 86400) / 3600)
     local minutes = math.floor((diff % 3600) / 60)
 
-    return ("%02d days %02d hours %02d minutes"):format(days, hours, minutes)
+    return Translate("timestring", days, hours, minutes)
 end
 
 ---@param playerId string
@@ -24,7 +30,7 @@ local function getPlayerIdentifier(playerId)
     if PFX.UsingMulticharacter then
         local xPlayer = ESX.GetPlayerFromId(playerId)
         if not xPlayer then
-            print(("xPlayer object for player %s (%s) not found. Try again!"):format(GetPlayerName(playerId), playerId))
+            errorPrint("xPlayer object for player %s (%s) not found. Try again!", GetPlayerName(playerId), playerId)
             return nil
         end
 
@@ -32,7 +38,7 @@ local function getPlayerIdentifier(playerId)
     else
         playerIdentifier = GetPlayerIdentifierByType(playerId, PFX.IdentifierType)
         if not playerIdentifier then
-            print(("Identifier %s for player %s not found. Try again!"):format(PFX.IdentifierType, GetPlayerName(playerId)))
+            errorPrint("Identifier %s for player %s not found. Try again!", PFX.IdentifierType, GetPlayerName(playerId))
             return nil
         end
 
@@ -59,18 +65,18 @@ Citizen.CreateThread(function()
             local result = ResetAllLives()
             if type(result) == "number" then
                 if result > 0 then
-                    print(("^2[Life Reset]^7 ResetAllLives updated ^5%d^7 rows to ^5%i^7"):format(result, PFX.Lives))
+                    errorPrint("^2[Life Reset]^7 ResetAllLives updated ^5%d^7 rows to ^5%i^7", result, PFX.Lives)
                 else
-                    print("^3[Life Reset]^7 ResetAllLives matched no rows")
+                    errorPrint("^3[Life Reset]^7 ResetAllLives matched no rows")
                 end
             else
-                print("^1[Life Reset]^7 ResetAllLives failed (nil result)")
+                errorPrint("^1[Life Reset]^7 ResetAllLives failed (nil result)")
             end
 
             local resetTime = os.time() + (PFX.CheckingDays * 24 * 60 * 60)
             SetResourceKvpInt(kvpInt, resetTime)
             livesReset = resetTime
-            print(("^2[Life Reset]^7 Next reset will be in ^5%s^7"):format(timeDiffHumanReadable()))
+            errorPrint("^2[Life Reset]^7 Next reset will be in ^5%s^7", timeDiffHumanReadable())
         end
 
         Citizen.Wait(PFX.CheckingInterval * 60 * 1000)
@@ -82,12 +88,12 @@ end)
 local function validatePlayerLives(playerId)
     local playerIdentifier = getPlayerIdentifier(playerId)
     if not playerIdentifier then
-        return false, "Player identifier not found. Try again!"
+        return false, Translate("player_identifier_not_found")
     end
 
     local playerLives = GetPlayersLives(playerIdentifier)
     if playerLives and playerLives == 0 then
-        return false, ("You do not have any remaining lives! Reset in: %s"):format(timeDiffHumanReadable())
+        return false, Translate("no_lives_remaining", timeDiffHumanReadable())
     elseif playerLives and playerLives > 0 then
         return true, nil
     elseif playerLives and playerLives == -1 then
@@ -96,16 +102,16 @@ local function validatePlayerLives(playerId)
             if result > 0 then
                 return true, nil
             else
-                return false, "Something went wrong when resetting your lives. Contact server support. CODE 1"
+                return false, Translate("reset_lives_error_code1")
             end
         else
-            return false, "Something went wrong when resetting your lives. Contact server support. CODE 2"
+            return false, Translate("reset_lives_error_code2")
         end
     elseif playerLives == nil then
         return true, nil
     end
 
-    print(("^1[Life System]^7 ValidatePlayerLives unexpected state for player %s (^5%s^7)"):format(GetPlayerName(playerId), playerIdentifier))
+    errorPrint("^1[Life System]^7 ValidatePlayerLives unexpected state for player %s (^5%s^7)", GetPlayerName(playerId), playerIdentifier)
     return false, nil
 end
 
@@ -113,7 +119,7 @@ if PFX.UsingMulticharacter then
     AddEventHandler('esx:playerLoaded', function (playerId, xPlayer, isNew)
         local allowed, message = validatePlayerLives(playerId)
         if not allowed then
-            DropPlayer(playerId, message or "No reason specified")
+            DropPlayer(playerId, message or Translate("no_reason_specified"))
             return
         end
     end)
@@ -124,12 +130,12 @@ else
         local elapsedTime = 0 -- seconds
         local stopTimer = false
 
-        deferrals.update("Checking your player's lives...")
+        deferrals.update(Translate("checking_lives"))
 
 
         Citizen.CreateThreadNow(function()
             while not stopTimer do
-                deferrals.update(("Checking your player's lives... %i seconds elapsed"):format(elapsedTime))
+                deferrals.update(Translate("checking_lives_elapsed", elapsedTime))
                 elapsedTime = elapsedTime + 1
                 Citizen.Wait(1000)
             end
@@ -142,7 +148,7 @@ else
         if allowed then
             deferrals.done()
         else
-            deferrals.done(message or "No reason specified")
+            deferrals.done(message or Translate("no_reason_specified"))
         end
     end)
 end
@@ -195,7 +201,7 @@ local function actionsBeforeKick(xPlayer)
     if affectedRows and affectedRows > 0 and xPlayer.setMeta then
         xPlayer.setMeta("health", 200)
     else
-        print(("Player %s (%s) IsDead not updated."):format(GetPlayerName(xPlayer.source), xPlayer.getIdentifier()))
+        errorPrint("Player %s (%s) IsDead not updated.", GetPlayerName(xPlayer.source), xPlayer.getIdentifier())
     end
 end
 
@@ -204,7 +210,7 @@ RegisterNetEvent('esx:onPlayerDeath', function()
 
     local xPlayer = ESX.GetPlayerFromId(playerId)
     if not xPlayer then
-        print(("Player %s has not been found by ESX"):format(playerId))
+        errorPrint("Player %s has not been found by ESX", playerId)
         return
     end
 
@@ -213,10 +219,10 @@ RegisterNetEvent('esx:onPlayerDeath', function()
 
     local result = DecrementPlayersLives(playerIdentifier)
     if result == nil then
-        print(("^1[Life System]^7 DecrementPlayersLives returned nil for player %s (^5%s^7)"):format(GetPlayerName(playerId), playerIdentifier))
+        errorPrint("^1[Life System]^7 DecrementPlayersLives returned nil for player %s (^5%s^7)", GetPlayerName(playerId), playerIdentifier)
         return
     elseif result == 0 then
-        print(("^3[Life System]^7 No rows updated while decrementing lives for player %s (^5%s^7). Likely already at 0."):format(GetPlayerName(playerId), playerIdentifier))
+        errorPrint("^3[Life System]^7 No rows updated while decrementing lives for player %s (^5%s^7). Likely already at 0.", GetPlayerName(playerId), playerIdentifier)
         return
     elseif result > 0 then
         local playersLives = GetPlayersLives(playerIdentifier)
@@ -237,21 +243,21 @@ RegisterNetEvent('esx:onPlayerDeath', function()
         until clientCbResult ~= nil or timeout >= 10 -- 5 seconds
 
         if not DoesPlayerExist(playerId) then
-            print(("^3[Life System]^7 Player %s (^5%s^7) disconnected before resurrect confirmation."):format(GetPlayerName(playerId) or "unknown", playerIdentifier))
+            errorPrint("^3[Life System]^7 Player %s (^5%s^7) disconnected before resurrect confirmation.", GetPlayerName(playerId) or "unknown", playerIdentifier)
             return
         end
 
         if clientCbResult == nil then
-            print(("^3[Life System]^7 Resurrect callback timed out for player %s (^5%s^7)."):format(GetPlayerName(playerId), playerIdentifier))
+            errorPrint("^3[Life System]^7 Resurrect callback timed out for player %s (^5%s^7).", GetPlayerName(playerId), playerIdentifier)
             return
         end
 
         if clientCbResult == false then
-            print(("^1[Life System]^7 Resurrect callback failed for player %s (^5%s^7)."):format(GetPlayerName(playerId), playerIdentifier))
+            errorPrint("^1[Life System]^7 Resurrect callback failed for player %s (^5%s^7).", GetPlayerName(playerId), playerIdentifier)
             return
         end
 
-        DropPlayer(playerId, "Used all remaining lives")
+        DropPlayer(playerId, Translate("used_all_lives"))
         return
     end
 end)
@@ -259,13 +265,13 @@ end)
 RegisterCommand("lives", function(source)
     local playerId = source
     if playerId == 0 then
-        print("Command is only usable ingame!")
+        errorPrint("Command is only usable ingame!")
         return
     end
 
     local xPlayer = ESX.GetPlayerFromId(playerId)
     if not xPlayer then
-        print(("Player %s has not been found by ESX"):format(source))
+        errorPrint("Player %s has not been found by ESX", source)
         return
     end
 
@@ -275,9 +281,9 @@ RegisterCommand("lives", function(source)
     local playersLives = GetPlayersLives(playerIdentifier)
 
     if not playersLives then
-        print(("^1[Life System]^7 GetPlayersLives returned nil for player %s (^5%s^7)"):format(GetPlayerName(playerId), playerIdentifier))
+        errorPrint("^1[Life System]^7 GetPlayersLives returned nil for player %s (^5%s^7)", GetPlayerName(playerId), playerIdentifier)
         return
     end
 
-    Notify(playerId, ("You have %i/%i lives remaining"):format(playersLives, PFX.Lives))
+    Notify(playerId, Translate("lives_remaining", playersLives, PFX.Lives))
 end, false)

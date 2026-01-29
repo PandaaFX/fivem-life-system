@@ -5,6 +5,7 @@
 ---@field ForceRespawnCoords vector4
 
 ---@class Config
+---@field Locale string
 ---@field Lives integer
 ---@field CheckingDays integer
 ---@field CheckingInterval integer
@@ -12,3 +13,4 @@
 ---@field RemovePrefix string|nil
 ---@field OnZeroLives ZeroLives
 ---@field UsingMulticharacter boolean
+---@field ErrorPrints boolean
