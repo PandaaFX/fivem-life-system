@@ -1,30 +1,30 @@
 ---@param identifier string
 ---@return number|nil
-function GetPlayersLifes(identifier)
-    local playerLifes = MySQL.scalar.await('SELECT COALESCE(lifes, -1) FROM `users` WHERE `identifier` = ? LIMIT 1', {
+function GetPlayersLives(identifier)
+    local playerLives = MySQL.scalar.await('SELECT COALESCE(lives, -1) FROM `users` WHERE `identifier` = ? LIMIT 1', {
         identifier
     })
 
-    return playerLifes and tonumber(playerLifes) or nil
+    return playerLives and tonumber(playerLives) or nil
 end
 
 ---@param identifier string
 ---@return integer|nil
-function ResetPlayersLife(identifier)
-    local affectedRows = MySQL.update.await('UPDATE `users` SET `lifes` = ? WHERE `identifier` = ?', {
-        PFX.Lifes,
+function ResetPlayersLives(identifier)
+    local affectedRows = MySQL.update.await('UPDATE `users` SET `lives` = ? WHERE `identifier` = ?', {
+        PFX.Lives,
         identifier
     })
 
     return affectedRows
 end
 
---- Sets the `lifes` column of every player that has either less than 'PFX.Lifes' or their `lifes` is NULL to 'PFX.Lifes'
+--- Sets the `lives` column of every player that has either less than 'PFX.Lives' or their `lives` is NULL to 'PFX.Lives'
 ---@return integer|nil
-function ResetAllLifes()
-    local affectedRows = MySQL.update.await('UPDATE `users` SET `lifes` = ? WHERE `lifes` < ? OR `lifes` IS NULL', {
-        PFX.Lifes,
-        PFX.Lifes
+function ResetAllLives()
+    local affectedRows = MySQL.update.await('UPDATE `users` SET `lives` = ? WHERE `lives` < ? OR `lives` IS NULL', {
+        PFX.Lives,
+        PFX.Lives
     })
 
     return affectedRows
@@ -32,8 +32,8 @@ end
 
 ---@param identifier string
 ---@return integer|nil
-function DecrementPlayersLife(identifier)
-    local affectedRows = MySQL.update.await('UPDATE `users` SET `lifes` = GREATEST(`lifes` - 1, 0) WHERE `identifier` = ? AND `lifes` > 0', {
+function DecrementPlayersLives(identifier)
+    local affectedRows = MySQL.update.await('UPDATE `users` SET `lives` = `lives` - 1 WHERE `identifier` = ? AND `lives` > 0', {
         identifier
     })
 
@@ -48,7 +48,7 @@ function SetPlayerIsDead(identifier, isDead)
     local affectedRows = MySQL.update.await([[
         UPDATE `users`
             SET `is_dead` = ?
-            WHERE `identifier` = ? AND `lifes` = 0
+            WHERE `identifier` = ? AND `lives` = 0
     ]], {
         dead,
         identifier
