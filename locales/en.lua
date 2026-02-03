@@ -11,5 +11,5 @@ Locales["en"] = {
     player_identifier_not_found = "Player identifier not found. Try again!",
     incremented_life = "Life added to %s (ID: %s, Identifier: %s). New lives: %i",
     decremented_life = "Life removed from %s (ID: %s, Identifier: %s). Remaining: %i",
-    reset_lives = "Lives reset for %s (ID: %s, Identifier: %s). New lives: %i"
+    reset_lives = "Lives reset for %s. New lives: %i"
 }

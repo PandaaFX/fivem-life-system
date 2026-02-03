@@ -369,21 +369,18 @@ if PFX.Commands.resetLivesForPlayer then
             return
         end
 
-        local targetId = tonumber(args[1])
-        if not targetId or not DoesPlayerExist(tostring(targetId)) then
-            errorPrint("Invalid player id provided")
+        local playerIdentifier = args[1]
+        if not playerIdentifier then
+            errorPrint("^1[Life System]^7 Please provide a player identifier!")
             return
         end
-
-        local playerIdentifier = getPlayerIdentifier(tostring(targetId))
-        if not playerIdentifier then return end
 
         local result = ResetPlayersLives(playerIdentifier)
         if not result or result == 0 then
-            errorPrint("^3[Life System]^7 No rows updated while resetting lives for player %s (^5%s^7).", GetPlayerName(targetId), playerIdentifier)
+            errorPrint("^3[Life System]^7 No rows updated while resetting lives for player %s.", playerIdentifier)
             return
         end
 
-        print(Translate("reset_lives", GetPlayerName(targetId), targetId, playerIdentifier, PFX.Lives))
+        print(Translate("reset_lives", playerIdentifier, PFX.Lives))
     end, true)
 end

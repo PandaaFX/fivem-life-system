@@ -11,5 +11,5 @@ Locales["de"] = {
     player_identifier_not_found = "Spieler-ID nicht gefunden. Bitte versuche es erneut!",
     incremented_life = "Leben hinzugefügt zu %s (ID: %s, Identifier: %s). Neue Leben: %i",
     decremented_life = "Leben entfernt von %s (ID: %s, Identifier: %s). Verbleibend: %i",
-    reset_lives = "Leben zurückgesetzt für %s (ID: %s, Identifier: %s). Neue Leben: %i"
+    reset_lives = "Leben zurückgesetzt für %s. Neue Leben: %i"
 }
