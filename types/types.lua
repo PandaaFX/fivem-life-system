@@ -4,13 +4,20 @@
 ---@field RemoveAllCurrencies boolean
 ---@field ForceRespawnCoords vector4
 
+---@class CommandFields
+---@field checkRemainingLives string
+---@field addLifeToPlayer string
+---@field removeLifeFromPlayer string
+---@field resetLivesForPlayer string
+
 ---@class Config
 ---@field Locale string
 ---@field Lives integer
 ---@field CheckingDays integer
 ---@field CheckingInterval integer
+---@field ErrorPrints boolean
 ---@field IdentifierType "steam"|"discord"|"xbl"|"live"|"license"|"license2"|"fivem"
 ---@field RemovePrefix string|nil
 ---@field OnZeroLives ZeroLives
 ---@field UsingMulticharacter boolean
----@field ErrorPrints boolean
+---@field Commands CommandFields

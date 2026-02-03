@@ -21,7 +21,14 @@ PFX = {
 
     -- if this setting is enabled the script will listen for the `esx:onPlayerLoaded` event instead of relying on the `playerConnecting`
     -- for the identification between different characters
-    UsingMulticharacter = false
+    UsingMulticharacter = false,
+
+    Commands = {
+        checkRemainingLives = "lives", -- ingame command
+        addLifeToPlayer = "addLife", -- console command
+        removeLifeFromPlayer = "removeLife", -- console command
+        resetLivesForPlayer = "resetLives" -- console command
+    }
 }
 
 function Notify(playerId, message)

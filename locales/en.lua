@@ -8,5 +8,8 @@ Locales["en"] = {
     no_reason_specified = "No reason specified",
     used_all_lives = "Used all remaining lives",
     lives_remaining = "You have %i/%i lives remaining",
-    player_identifier_not_found = "Player identifier not found. Try again!"
+    player_identifier_not_found = "Player identifier not found. Try again!",
+    incremented_life = "Life added to %s (ID: %s, Identifier: %s). New lives: %i",
+    decremented_life = "Life removed from %s (ID: %s, Identifier: %s). Remaining: %i",
+    reset_lives = "Lives reset for %s (ID: %s, Identifier: %s). New lives: %i"
 }

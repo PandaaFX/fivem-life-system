@@ -41,6 +41,17 @@ function DecrementPlayersLives(identifier)
 end
 
 ---@param identifier string
+---@return integer|nil
+function IncrementPlayersLives(identifier)
+    local affectedRows = MySQL.update.await('UPDATE `users` SET `lives` = `lives` + 1 WHERE `identifier` = ? AND `lives` < ?', {
+        identifier,
+        PFX.Lives
+    })
+
+    return affectedRows
+end
+
+---@param identifier string
 ---@param isDead boolean
 ---@return integer|nil
 function SetPlayerIsDead(identifier, isDead)

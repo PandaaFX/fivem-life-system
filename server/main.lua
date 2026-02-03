@@ -262,28 +262,128 @@ RegisterNetEvent('esx:onPlayerDeath', function()
     end
 end)
 
-RegisterCommand("lives", function(source)
-    local playerId = source
-    if playerId == 0 then
-        errorPrint("Command is only usable ingame!")
-        return
-    end
+if PFX.Commands.checkRemainingLives then
+    ---@param source integer
+    RegisterCommand(PFX.Commands.checkRemainingLives, function(source)
+        local playerId = source
+        if playerId == 0 then
+            errorPrint("Command is only usable ingame!")
+            return
+        end
 
-    local xPlayer = ESX.GetPlayerFromId(playerId)
-    if not xPlayer then
-        errorPrint("Player %s has not been found by ESX", source)
-        return
-    end
+        if not DoesPlayerExist(tostring(playerId)) then
+            errorPrint("Player %s has not been found on the server", playerId)
+            return
+        end
 
-    local playerIdentifier = getPlayerIdentifier(playerId)
-    if not playerIdentifier then return end
+        local playerIdentifier = getPlayerIdentifier(tostring(playerId))
+        if not playerIdentifier then return end
 
-    local playersLives = GetPlayersLives(playerIdentifier)
+        local playersLives = GetPlayersLives(playerIdentifier)
 
-    if not playersLives then
-        errorPrint("^1[Life System]^7 GetPlayersLives returned nil for player %s (^5%s^7)", GetPlayerName(playerId), playerIdentifier)
-        return
-    end
+        if not playersLives then
+            errorPrint("^1[Life System]^7 GetPlayersLives returned nil for player %s (^5%s^7)", GetPlayerName(playerId), playerIdentifier)
+            return
+        end
 
-    Notify(playerId, Translate("lives_remaining", playersLives, PFX.Lives))
-end, false)
+        Notify(playerId, Translate("lives_remaining", playersLives, PFX.Lives))
+    end, false)
+end
+
+if PFX.Commands.addLifeToPlayer then
+    ---@param source integer
+    ---@param args table<integer, string>
+    RegisterCommand(PFX.Commands.addLifeToPlayer, function(source, args)
+        if source ~= 0 then
+            errorPrint("Command is only usable on the console!")
+            return
+        end
+
+        local targetId = tonumber(args[1])
+        if not targetId or not DoesPlayerExist(tostring(targetId)) then
+            errorPrint("Invalid player id provided")
+            return
+        end
+
+        local playerIdentifier = getPlayerIdentifier(tostring(targetId))
+        if not playerIdentifier then return end
+
+        local result = IncrementPlayersLives(playerIdentifier)
+        if not result or result == 0 then
+            errorPrint("^3[Life System]^7 No rows updated while incrementing lives for player %s (^5%s^7). Already at max.", GetPlayerName(targetId), playerIdentifier)
+            return
+        end
+
+        local playersLives = GetPlayersLives(playerIdentifier)
+
+        if not playersLives then
+            errorPrint("^1[Life System]^7 GetPlayersLives returned nil for player %s (^5%s^7)", GetPlayerName(targetId), playerIdentifier)
+            return
+        end
+
+        print(Translate("incremented_life", GetPlayerName(targetId), targetId, playerIdentifier, playersLives))
+    end, true)
+end
+
+if PFX.Commands.removeLifeFromPlayer then
+    ---@param source integer
+    ---@param args table<integer, string>
+    RegisterCommand(PFX.Commands.removeLifeFromPlayer, function(source, args)
+        if source ~= 0 then
+            errorPrint("Command is only usable on the console!")
+            return
+        end
+
+        local targetId = tonumber(args[1])
+        if not targetId or not DoesPlayerExist(tostring(targetId)) then
+            errorPrint("Invalid player id provided")
+            return
+        end
+
+        local playerIdentifier = getPlayerIdentifier(tostring(targetId))
+        if not playerIdentifier then return end
+
+        local result = DecrementPlayersLives(playerIdentifier)
+        if not result or result == 0 then
+            errorPrint("^3[Life System]^7 No rows updated while decrementing lives for player %s (^5%s^7).", GetPlayerName(targetId), playerIdentifier)
+            return
+        end
+
+        local playersLives = GetPlayersLives(playerIdentifier)
+
+        if not playersLives then
+            errorPrint("^1[Life System]^7 GetPlayersLives returned nil for player %s (^5%s^7)", GetPlayerName(targetId), playerIdentifier)
+            return
+        end
+
+        print(Translate("decremented_life", GetPlayerName(targetId), targetId, playerIdentifier, playersLives))
+    end, true)
+end
+
+if PFX.Commands.resetLivesForPlayer then
+    ---@param source integer
+    ---@param args table<integer, string>
+    RegisterCommand(PFX.Commands.resetLivesForPlayer, function(source, args)
+        if source ~= 0 then
+            errorPrint("Command is only usable on the console!")
+            return
+        end
+
+        local targetId = tonumber(args[1])
+        if not targetId or not DoesPlayerExist(tostring(targetId)) then
+            errorPrint("Invalid player id provided")
+            return
+        end
+
+        local playerIdentifier = getPlayerIdentifier(tostring(targetId))
+        if not playerIdentifier then return end
+
+        local result = ResetPlayersLives(playerIdentifier)
+        if not result or result == 0 then
+            errorPrint("^3[Life System]^7 No rows updated while resetting lives for player %s (^5%s^7).", GetPlayerName(targetId), playerIdentifier)
+            return
+        end
+
+        print(Translate("reset_lives", GetPlayerName(targetId), targetId, playerIdentifier, PFX.Lives))
+    end, true)
+end
